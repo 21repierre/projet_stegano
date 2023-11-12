@@ -48,34 +48,36 @@ class Newton:
         :return: le point minimum
         """
 
+        # Définition des matrices de base
         pi = np.matrix(pi_0).T
         v = np.matrix(np.array([1., 1.])).T
         hess = self.hess_f0(pi)
+        
         # 1ere matrice des conditions KKT pour le calcul de la direction
         mat1 = np.block([
             [hess, self.A.transpose()],
             [self.A, np.zeros((2, 2))]
         ])
         grad = self.grad_f0(pi)
+        
         # Matrice contenant d0 et v0
         calc = np.linalg.inv(mat1) * -np.matrix(np.block([grad, (self.A * pi - self.b).T])).T
-        d = np.matrix(calc[:-2])
 
+        # On extrait d et v de la matrice
+        d = np.matrix(calc[:-2])
         dv = calc[-2:]
         print(dv)
 
-        # pi = pi_0
+        # Ajout de pi pour tracer le graphe
         self.pis.append(np.matrix(pi))
 
         # Critere d'arret
         while 1 / 2 * d.T * hess * d > epsilon:
-            # print("Evolution of pi:", pi, pi + d.T.__array__()[0], 1 / 2 * d.T * hess * d)
-
             # Deplacement de pi dans la direction d
             # calcul d'un pas pour eviter d'avoir une coordonnée de pi négative
             t = 1
             while True:
-                pip = pi + t * d  # .T.__array__()[0]
+                pip = pi + t * d
                 good = True
                 for x in pip:
                     if x < 0:
@@ -83,6 +85,8 @@ class Newton:
                         good = False
                 if good:
                     break
+
+            # Mise à jour de pi et de v puis ajout de pi pour tracer le graphe
             pi += t * d
             v += t * dv
             self.pis.append(np.matrix(pi))
