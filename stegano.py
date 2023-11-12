@@ -35,17 +35,21 @@ def make_charmap():
 
 def encode(original_pic: np.ndarray, message: str, symbols_gen) -> np.ndarray:
     charmap, symbols, M = symbols_gen()
-    pi_0 = np.array([0.1] + [0.5 / ((M - 1) * k) for k in range(1, M // 2 + 1)] + [0.5 / ((M - 1) * k) for k in range(1, M // 2 + 1)])
+    pi_0 = np.array([0.2] + [0.5 / ((M - 1) * k) for k in range(1, M // 2 + 1)] + [0.5 / ((M - 1) * k) for k in range(1, M // 2 + 1)])
+    print(pi_0, sum(pi_0))
 
     poids = np.matrix([0] * M)
     for k, s in enumerate(symbols):
         poids[0, k] = (abs(s)) ** 2 / 1
 
-    newton = Newton(symbols, poids)
+    d0 = np.mean(poids)
+
+    newton = Newton(symbols, poids, d0)
     pi = newton.run(pi_0, 10 ** -9)
     """print(charmap)
     print(poids)
     print(symbols)"""
+    print(pi, sum(pi))
 
     flat_image = original_pic.flatten()
 
@@ -57,7 +61,7 @@ def encode(original_pic: np.ndarray, message: str, symbols_gen) -> np.ndarray:
         flat_image[lastPixel] = (flat_image[lastPixel] + charmap[message[i]])
         lastPixel += 1
     print(f"Last pixel modified: {lastPixel}")
-    destImage = flat_image.reshape(image.shape)
+    destImage = flat_image.reshape(original_pic.shape)
     return destImage
 
 
@@ -80,19 +84,6 @@ def sanitaire(message, alphabet):
 
     return r_mess
 
-image = imread('source_pic/1.pgm')
 
-message = "La stéganographie est l’art de cacher un message secret dans un contenu anodin appelé contenu original (appelé cover) pour obtenir un contenu modifié (appelé stego) en minimisant toute discri- mination possible entre le contenu original (cover) et le contenu modifié (stego). La stéganographie est souvent appliquée sur des images, en niveaux de gris ou en couleur, sur les pixels (sur l’image brute) ou sur une version compressée de cette image (par exemple son format jpeg). Nous nous intéresserons dans ce projet à appliquer la stéganographie sur des images en niveaux de gris en insérant le message dans l’image brute"
-cmessage = sanitaire(message, list(make_charmap()[0].keys()))
-destImage = encode(image, cmessage, make_charmap)
-
-im_base = Image.fromarray(image)
-im_dest = Image.fromarray(destImage)
-im_base.show()
-im_dest.show()
-im_dest.save('des_pic/1.png')
-
-testDec = decode(destImage, image, make_charmap()[0])
-print(testDec)
 
 # im.show()
