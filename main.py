@@ -86,4 +86,4 @@ def q_steg():
     print(testDec)
 
 
-q_e()
+q_steg()
